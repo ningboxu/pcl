@@ -4,7 +4,9 @@
 #include <sys/stat.h>  // 用于创建目录
 #include <unistd.h>    // 用于获取当前工作目录
 #include <cmath>
+#include <fstream>  // 用于文件操作
 #include <iostream>
+#include <limits>  // 用于初始化最大值和最小值
 #include <map>
 #include <numeric>
 #include <vector>
@@ -16,10 +18,15 @@ struct Grid
         new pcl::PointCloud<pcl::PointXYZ>};
     double x_mean{0.0};
     double x_stddev{0.0};
+    double x_min{std::numeric_limits<double>::max()};
+    double x_max{std::numeric_limits<double>::lowest()};
 
     void addPoint(const pcl::PointXYZ& point)
     {
         grid_cloud->points.push_back(point);
+        // 更新最小值和最大值
+        if (point.x < x_min) x_min = point.x;
+        if (point.x > x_max) x_max = point.x;
     }
 
     void computeStatistics()
@@ -80,10 +87,34 @@ public:
             const auto& stats    = grid_entry.second;
 
             LOG(INFO) << "Grid (" << grid_key.first << ", " << grid_key.second
-                      << "): " << "Mean X = " << stats.x_mean
+                      << "): Mean X = " << stats.x_mean
                       << ", Stddev X = " << stats.x_stddev
+                      << ", Min X = " << stats.x_min
+                      << ", Max X = " << stats.x_max
                       << ", Points Count = " << stats.grid_cloud->points.size();
         }
+    }
+
+    // 将统计数据保存到CSV文件中
+    void saveStatisticsToCSV(const std::string& filename) const
+    {
+        std::ofstream file(filename);
+
+        // 写入表头
+        file << "Grid Y,Grid Z,Mean X,Stddev X,Min X,Max X,Points Count\n";
+
+        for (const auto& grid_entry : grid_map_)
+        {
+            const auto& grid_key = grid_entry.first;
+            const auto& stats    = grid_entry.second;
+
+            file << grid_key.first << "," << grid_key.second << ","
+                 << stats.x_mean << "," << stats.x_stddev << "," << stats.x_min
+                 << "," << stats.x_max << "," << stats.grid_cloud->points.size()
+                 << "\n";
+        }
+
+        file.close();
     }
 
 private:
@@ -127,6 +158,9 @@ int main(int argc, char** argv)
     PointCloudGridProcessor processor(grid_size_y, grid_size_z);
     processor.process(cloud);
     processor.logStatistics();
+
+    // 保存统计数据到CSV文件
+    processor.saveStatisticsToCSV("grid_statistics.csv");
 
     return 0;
 }
