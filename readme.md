@@ -10,4 +10,8 @@
 | BatchConditionalFilter.cpp    | 批量（目录），保存到原目录下 |      |
 | newBatchConditionalFilter.cpp | 批量处理，保存到新目录       |      |
 | GridStats.cpp                 | 栅格化、统计信息、log、csv   |      |
+| cropcloud.cpp                 | 按xyz范围裁剪点云            |      |
+|                               |                              |      |
+
+
 

@@ -13,7 +13,7 @@ set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -Wno-deprecated")
 
 # 查找PCL库
-find_package(PCL 1.8 REQUIRED COMPONENTS common io features filters segmentation visualization)
+find_package(PCL 1.8 REQUIRED COMPONENTS common io features filters segmentation visualization surface)
 
 # 查找Boost库，特别是文件系统组件
 find_package(Boost REQUIRED COMPONENTS filesystem system)
